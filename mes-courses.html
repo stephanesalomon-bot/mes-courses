@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mes Courses</title>
+
+  <!-- PWA / iPhone home screen -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Mes Courses">
+  <meta name="theme-color" content="#2e7d32">
+  <link rel="apple-touch-icon" id="appleIcon">
+  <link rel="manifest" id="manifestLink">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #2e7d32;
+      --primary-light: #4caf50;
+      --primary-dark: #1b5e20;
+      --accent: #ff6f00;
+      --bg: #f1f8e9;
+      --card: #ffffff;
+      --text: #212121;
+      --text-muted: #757575;
+      --border: #e0e0e0;
+      --checked-bg: #e8f5e9;
+      --danger: #c62828;
+      --shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 100px;
+    }
+
+    /* HEADER */
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 16px 20px 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    header h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    header h1 span { font-size: 1.1rem; }
+
+    .header-sub {
+      font-size: 0.78rem;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+
+    /* CART TOTAL BANNER */
+    .cart-banner {
+      background: var(--accent);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      position: sticky;
+      top: 68px;
+      z-index: 99;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .cart-banner .label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cart-banner .total {
+      font-size: 1.4rem;
+      font-weight: 800;
+    }
+
+    .cart-banner .count {
+      font-size: 0.75rem;
+      opacity: 0.9;
+      text-align: right;
+    }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      background: white;
+      border-bottom: 2px solid var(--border);
+      position: sticky;
+      top: 110px;
+      z-index: 98;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 11px 8px;
+      border: none;
+      background: none;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .tab-btn .badge {
+      background: var(--primary-light);
+      color: white;
+      border-radius: 10px;
+      padding: 1px 7px;
+      font-size: 0.72rem;
+      margin-left: 4px;
+    }
+
+    /* CONTENT */
+    .content { padding: 12px 14px; }
+
+    /* ADD FORM */
+    .add-form {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .add-form h2 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 12px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .form-row.single { display: block; }
+
+    input[type="text"], input[type="number"], textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: var(--text);
+      background: #fafafa;
+      transition: border-color 0.2s;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="text"]:focus, input[type="number"]:focus {
+      border-color: var(--primary-light);
+      background: white;
+    }
+
+    input[type="number"] { width: 120px; flex-shrink: 0; }
+
+    .price-wrapper {
+      position: relative;
+      width: 120px;
+      flex-shrink: 0;
+    }
+
+    .price-wrapper input {
+      padding-left: 22px;
+      width: 100%;
+    }
+
+    .price-wrapper::before {
+      content: '€';
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    /* Photo input */
+    .photo-section {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .photo-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 14px;
+      border: 1.5px dashed var(--primary-light);
+      border-radius: 8px;
+      background: #f9fbe7;
+      color: var(--primary);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .photo-preview-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 2px solid var(--primary-light);
+      display: none;
+    }
+
+    input[type="file"] { display: none; }
+
+    /* Quantity control */
+    .qty-control {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      height: 40px;
+      flex-shrink: 0;
+    }
+
+    .qty-btn {
+      width: 34px;
+      height: 100%;
+      border: none;
+      background: #f5f5f5;
+      font-size: 1.1rem;
+      color: var(--primary-dark);
+      cursor: pointer;
+      font-weight: 700;
+      transition: background 0.15s;
+    }
+
+    .qty-btn:active { background: #e0e0e0; }
+
+    .qty-display {
+      width: 36px;
+      text-align: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-add {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-add:active { background: var(--primary-dark); }
+
+    /* ITEM LIST */
+    .section-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin: 14px 0 8px;
+      padding: 0 2px;
+    }
+
+    .item-card {
+      background: var(--card);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: opacity 0.2s;
+      border-left: 4px solid transparent;
+    }
+
+    .item-card.checked {
+      background: var(--checked-bg);
+      border-left-color: var(--primary-light);
+      opacity: 0.75;
+    }
+
+    .item-main {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      gap: 10px;
+    }
+
+    /* Checkbox */
+    .check-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      background: white;
+    }
+
+    .check-circle.checked {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .check-circle svg { display: none; }
+    .check-circle.checked svg { display: block; }
+
+    /* Photo thumb */
+    .item-photo {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+    }
+
+    .item-no-photo {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+      background: #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: #bdbdbd;
+      font-size: 1.4rem;
+    }
+
+    .item-info { flex: 1; min-width: 0; }
+
+    .item-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-card.checked .item-name {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .item-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .item-qty {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: #f0f0f0;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    .item-price {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .item-price-total {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .item-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+      border: none;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.15s;
+    }
+
+    .btn-del { background: #ffebee; color: var(--danger); }
+    .btn-del:active { background: #ffcdd2; }
+    .btn-edit { background: #e3f2fd; color: #1565c0; }
+    .btn-edit:active { background: #bbdefb; }
+
+    /* Inline price edit */
+    .item-price-input {
+      width: 85px;
+      padding: 4px 8px 4px 18px;
+      border: 1.5px solid var(--primary-light);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: white;
+      outline: none;
+      position: relative;
+    }
+
+    .price-inline-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .price-inline-wrap::before {
+      content: '€';
+      position: absolute;
+      left: 7px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Empty state */
+    .empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty .icon { font-size: 3rem; margin-bottom: 10px; }
+    .empty p { font-size: 0.9rem; }
+
+    /* Bottom toolbar */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 1px solid var(--border);
+      display: flex;
+      padding: 8px 12px;
+      gap: 8px;
+      z-index: 200;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+    }
+
+    .bottom-bar button {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-clear-checked {
+      background: #fff3e0;
+      color: var(--accent);
+    }
+
+    .btn-clear-all {
+      background: #ffebee;
+      color: var(--danger);
+    }
+
+    .btn-share {
+      background: #e8f5e9;
+      color: var(--primary-dark);
+    }
+
+    /* Modal photo */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal-overlay img {
+      max-width: 92vw;
+      max-height: 85vh;
+      border-radius: 12px;
+      object-fit: contain;
+    }
+
+    /* Category badge */
+    .cat-chip {
+      font-size: 0.7rem;
+      padding: 1px 7px;
+      border-radius: 10px;
+      font-weight: 600;
+      color: white;
+      background: #9e9e9e;
+    }
+
+    /* Swipe hint */
+    .swipe-hint {
+      font-size: 0.72rem;
+      color: #bbb;
+      text-align: center;
+      padding: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🛒 Mes Courses <span>— Ne rien oublier</span></h1>
+  <div class="header-sub" id="headerSub">0 article dans la liste</div>
+</header>
+
+<div class="cart-banner">
+  <div>
+    <div class="label">🧺 Dans le caddy</div>
+    <div class="count" id="cartCount">0 article coché</div>
+  </div>
+  <div class="total" id="cartTotal">0,00 €</div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('list')" id="tabList">
+    📋 Ma liste <span class="badge" id="badgeList">0</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('add')" id="tabAdd">
+    ➕ Ajouter
+  </button>
+  <button class="tab-btn" onclick="switchTab('done')" id="tabDone">
+    ✅ Cochés <span class="badge" id="badgeDone">0</span>
+  </button>
+</div>
+
+<!-- TAB: LISTE -->
+<div class="content" id="viewList">
+  <div id="itemListContainer"></div>
+  <div id="doneListContainer"></div>
+</div>
+
+<!-- TAB: AJOUTER -->
+<div class="content" id="viewAdd" style="display:none">
+  <div class="add-form">
+    <h2>Ajouter un article</h2>
+
+    <div class="form-row single" style="margin-bottom:10px">
+      <input type="text" id="inputName" placeholder="Nom du produit *" maxlength="60" autocomplete="off">
+    </div>
+
+    <div class="form-row">
+      <div style="flex:1">
+        <div class="qty-control">
+          <button class="qty-btn" onclick="changeQty(-1)">−</button>
+          <div class="qty-display" id="qtyDisplay">1</div>
+          <button class="qty-btn" onclick="changeQty(1)">+</button>
+        </div>
+      </div>
+      <div class="price-wrapper">
+        <input type="number" id="inputPrice" placeholder="0,00" min="0" step="0.01">
+      </div>
+    </div>
+
+    <div class="photo-section">
+      <label class="photo-btn" for="inputPhoto">
+        📷 Photo
+      </label>
+      <input type="file" id="inputPhoto" accept="image/*" capture="environment" onchange="handlePhoto(this)">
+      <img class="photo-preview-thumb" id="photoThumb" src="" alt="photo">
+      <span id="photoLabel" style="font-size:0.8rem;color:var(--text-muted)">Optionnelle</span>
+    </div>
+
+    <div class="form-row single">
+      <input type="text" id="inputCategory" placeholder="Catégorie (rayon, ex: Fruits, Surgelés…)" maxlength="30" autocomplete="off">
+    </div>
+
+    <button class="btn-add" onclick="addItem()">Ajouter à la liste</button>
+  </div>
+</div>
+
+<!-- TAB: COCHÉS -->
+<div class="content" id="viewDone" style="display:none">
+  <div id="doneOnlyContainer"></div>
+</div>
+
+<!-- Bottom actions -->
+<div class="bottom-bar">
+  <button class="btn-clear-checked" onclick="clearChecked()">Retirer cochés</button>
+  <button class="btn-share" onclick="shareList()">Partager</button>
+  <button class="btn-clear-all" onclick="clearAll()">Tout effacer</button>
+</div>
+
+<!-- Modal photo -->
+<div class="modal-overlay" id="photoModal" onclick="closeModal()">
+  <img id="modalImg" src="" alt="Photo produit">
+</div>
+
+<script>
+  // ── DATA ──────────────────────────────────────────────────────────────────
+  let items = JSON.parse(localStorage.getItem('courses_items') || '[]');
+  let currentQty = 1;
+  let currentPhotoDataUrl = null;
+  let editingId = null;
+  let currentTab = 'list';
+
+  function save() {
+    localStorage.setItem('courses_items', JSON.stringify(items));
+  }
+
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2);
+  }
+
+  // ── PHOTO ─────────────────────────────────────────────────────────────────
+  function handlePhoto(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      // Resize to save space
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX = 600;
+        let w = img.width, h = img.height;
+        if (w > h && w > MAX) { h = h * MAX / w; w = MAX; }
+        else if (h > MAX) { w = w * MAX / h; h = MAX; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        currentPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+        const thumb = document.getElementById('photoThumb');
+        thumb.src = currentPhotoDataUrl;
+        thumb.style.display = 'block';
+        document.getElementById('photoLabel').textContent = 'Photo ajoutée ✓';
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ── QTY ───────────────────────────────────────────────────────────────────
+  function changeQty(delta) {
+    currentQty = Math.max(1, currentQty + delta);
+    document.getElementById('qtyDisplay').textContent = currentQty;
+  }
+
+  // ── ADD / EDIT ────────────────────────────────────────────────────────────
+  function addItem() {
+    const name = document.getElementById('inputName').value.trim();
+    if (!name) {
+      document.getElementById('inputName').focus();
+      document.getElementById('inputName').style.borderColor = '#e53935';
+      setTimeout(() => document.getElementById('inputName').style.borderColor = '', 1200);
+      return;
+    }
+    const price = parseFloat(document.getElementById('inputPrice').value) || 0;
+    const category = document.getElementById('inputCategory').value.trim();
+
+    if (editingId) {
+      const item = items.find(i => i.id === editingId);
+      if (item) {
+        item.name = name;
+        item.price = price;
+        item.qty = currentQty;
+        item.photo = currentPhotoDataUrl || item.photo;
+        item.category = category;
+      }
+      editingId = null;
+      document.querySelector('.btn-add').textContent = 'Ajouter à la liste';
+    } else {
+      items.push({
+        id: uid(),
+        name,
+        price,
+        qty: currentQty,
+        photo: currentPhotoDataUrl,
+        category,
+        checked: false,
+        addedAt: Date.now()
+      });
+    }
+
+    save();
+    resetForm();
+    switchTab('list');
+    render();
+  }
+
+  function resetForm() {
+    document.getElementById('inputName').value = '';
+    document.getElementById('inputPrice').value = '';
+    document.getElementById('inputCategory').value = '';
+    currentQty = 1;
+    document.getElementById('qtyDisplay').textContent = '1';
+    currentPhotoDataUrl = null;
+    const thumb = document.getElementById('photoThumb');
+    thumb.src = ''; thumb.style.display = 'none';
+    document.getElementById('photoLabel').textContent = 'Optionnelle';
+    document.getElementById('inputPhoto').value = '';
+  }
+
+  function startEdit(id) {
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+    editingId = id;
+    document.getElementById('inputName').value = item.name;
+    document.getElementById('inputPrice').value = item.price || '';
+    document.getElementById('inputCategory').value = item.category || '';
+    currentQty = item.qty;
+    document.getElementById('qtyDisplay').textContent = currentQty;
+    currentPhotoDataUrl = item.photo;
+    if (item.photo) {
+      const thumb = document.getElementById('photoThumb');
+      thumb.src = item.photo;
+      thumb.style.display = 'block';
+      document.getElementById('photoLabel').textContent = 'Photo existante';
+    }
+    document.querySelector('.btn-add').textContent = 'Enregistrer les modifications';
+    switchTab('add');
+    document.getElementById('inputName').focus();
+  }
+
+  // ── TOGGLE CHECK ──────────────────────────────────────────────────────────
+  function toggleCheck(id) {
+    const item = items.find(i => i.id === id);
+    if (item) {
+      item.checked = !item.checked;
+      save();
+      render();
+    }
+  }
+
+  // ── PRICE INLINE ─────────────────────────────────────────────────────────
+  function updatePriceInline(id, val) {
+    const item = items.find(i => i.id === id);
+    if (item) {
+      item.price = parseFloat(val) || 0;
+      save();
+      updateTotals();
+    }
+  }
+
+  // ── DELETE ────────────────────────────────────────────────────────────────
+  function deleteItem(id) {
+    items = items.filter(i => i.id !== id);
+    save();
+    render();
+  }
+
+  function clearChecked() {
+    const count = items.filter(i => i.checked).length;
+    if (!count) return;
+    if (confirm(`Retirer les ${count} article(s) coché(s) ?`)) {
+      items = items.filter(i => !i.checked);
+      save();
+      render();
+    }
+  }
+
+  function clearAll() {
+    if (!items.length) return;
+    if (confirm('Effacer toute la liste ?')) {
+      items = [];
+      save();
+      render();
+    }
+  }
+
+  // ── SHARE ─────────────────────────────────────────────────────────────────
+  function shareList() {
+    const lines = items.map(i => {
+      const check = i.checked ? '✅' : '☐';
+      const price = i.price ? ` — ${fmtPrice(i.price * i.qty)}` : '';
+      const qty = i.qty > 1 ? ` x${i.qty}` : '';
+      return `${check} ${i.name}${qty}${price}`;
+    });
+    const total = items.filter(i => i.checked).reduce((s, i) => s + i.price * i.qty, 0);
+    const text = `🛒 Mes Courses\n\n${lines.join('\n')}\n\n🧺 Caddy : ${fmtPrice(total)}`;
+    if (navigator.share) {
+      navigator.share({ title: 'Mes Courses', text });
+    } else {
+      navigator.clipboard.writeText(text).then(() => alert('Liste copiée dans le presse-papiers !'));
+    }
+  }
+
+  // ── PHOTO MODAL ───────────────────────────────────────────────────────────
+  function openPhoto(src) {
+    document.getElementById('modalImg').src = src;
+    document.getElementById('photoModal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('photoModal').classList.remove('open');
+  }
+
+  // ── FORMAT ────────────────────────────────────────────────────────────────
+  function fmtPrice(n) {
+    return n.toFixed(2).replace('.', ',') + ' €';
+  }
+
+  // ── TABS ──────────────────────────────────────────────────────────────────
+  function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById('viewList').style.display = tab === 'list' ? '' : 'none';
+    document.getElementById('viewAdd').style.display = tab === 'add' ? '' : 'none';
+    document.getElementById('viewDone').style.display = tab === 'done' ? '' : 'none';
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+    if (tab === 'add' && !editingId) resetForm();
+  }
+
+  // ── RENDER ────────────────────────────────────────────────────────────────
+  function renderItemCard(item) {
+    const pricePerUnit = item.price ? `${fmtPrice(item.price)}` : '';
+    const priceTotal = (item.price && item.qty > 1) ? `(${fmtPrice(item.price * item.qty)} tot.)` : '';
+    const catColor = catColors[item.category] || '#9e9e9e';
+
+    return `
+    <div class="item-card ${item.checked ? 'checked' : ''}" id="card-${item.id}">
+      <div class="item-main">
+        <div class="check-circle ${item.checked ? 'checked' : ''}" onclick="toggleCheck('${item.id}')">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <polyline points="2,7 5.5,11 12,3" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        ${item.photo
+          ? `<img class="item-photo" src="${item.photo}" alt="" onclick="openPhoto('${item.photo}')">`
+          : `<div class="item-no-photo">🛍️</div>`}
+
+        <div class="item-info">
+          <div class="item-name">${item.name}</div>
+          <div class="item-meta">
+            ${item.qty > 1 ? `<span class="item-qty">x${item.qty}</span>` : ''}
+            ${item.category ? `<span class="cat-chip" style="background:${catColor}">${item.category}</span>` : ''}
+          </div>
+          <div class="item-meta" style="margin-top:4px">
+            <div class="price-inline-wrap">
+              <input class="item-price-input"
+                type="number" min="0" step="0.01"
+                value="${item.price || ''}"
+                placeholder="Prix €"
+                oninput="updatePriceInline('${item.id}', this.value)"
+              >
+            </div>
+            ${priceTotal ? `<span class="item-price-total">${priceTotal}</span>` : ''}
+          </div>
+        </div>
+
+        <div class="item-actions">
+          <button class="btn-icon btn-edit" onclick="startEdit('${item.id}')" title="Modifier">✏️</button>
+          <button class="btn-icon btn-del" onclick="deleteItem('${item.id}')" title="Supprimer">🗑️</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // Category colors
+  const CAT_PALETTE = ['#43a047','#e53935','#1e88e5','#fb8c00','#8e24aa','#00897b','#6d4c41','#039be5'];
+  const catColorMap = {};
+  function getCatColor(name) {
+    if (!name) return '#9e9e9e';
+    if (!catColorMap[name]) {
+      const idx = Object.keys(catColorMap).length % CAT_PALETTE.length;
+      catColorMap[name] = CAT_PALETTE[idx];
+    }
+    return catColorMap[name];
+  }
+  const catColors = new Proxy(catColorMap, {
+    get: (t, k) => getCatColor(k)
+  });
+
+  function updateTotals() {
+    const checked = items.filter(i => i.checked);
+    const total = checked.reduce((s, i) => s + (i.price || 0) * i.qty, 0);
+    document.getElementById('cartTotal').textContent = fmtPrice(total);
+    document.getElementById('cartCount').textContent =
+      checked.length === 0 ? 'Rien encore coché' :
+      `${checked.length} article${checked.length > 1 ? 's' : ''} coché${checked.length > 1 ? 's' : ''}`;
+  }
+
+  function render() {
+    const unchecked = items.filter(i => !i.checked);
+    const checked = items.filter(i => i.checked);
+
+    // Badges
+    document.getElementById('badgeList').textContent = unchecked.length;
+    document.getElementById('badgeDone').textContent = checked.length;
+
+    // Header sub
+    const total = items.length;
+    document.getElementById('headerSub').textContent =
+      total === 0 ? 'Liste vide — ajoutez vos articles' :
+      `${total} article${total > 1 ? 's' : ''} au total`;
+
+    // TAB LIST
+    let listHTML = '';
+    if (unchecked.length === 0 && checked.length === 0) {
+      listHTML = `<div class="empty">
+        <div class="icon">🛒</div>
+        <p>Votre liste est vide.<br>Appuyez sur <strong>Ajouter</strong> pour commencer.</p>
+      </div>`;
+    } else {
+      if (unchecked.length > 0) {
+        listHTML += `<div class="section-title">À prendre (${unchecked.length})</div>`;
+        listHTML += unchecked.map(renderItemCard).join('');
+      }
+      if (checked.length > 0) {
+        listHTML += `<div class="section-title" style="margin-top:16px">Déjà dans le caddy (${checked.length})</div>`;
+        listHTML += checked.map(renderItemCard).join('');
+      }
+    }
+    document.getElementById('itemListContainer').innerHTML = listHTML;
+    document.getElementById('doneListContainer').innerHTML = '';
+
+    // TAB DONE
+    let doneHTML = '';
+    if (checked.length === 0) {
+      doneHTML = `<div class="empty">
+        <div class="icon">✅</div>
+        <p>Aucun article coché pour l'instant.</p>
+      </div>`;
+    } else {
+      doneHTML += `<div class="section-title">Dans le caddy (${checked.length})</div>`;
+      doneHTML += checked.map(renderItemCard).join('');
+    }
+    document.getElementById('doneOnlyContainer').innerHTML = doneHTML;
+
+    updateTotals();
+  }
+
+  // ── KEYBOARD ──────────────────────────────────────────────────────────────
+  document.getElementById('inputName').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('inputPrice').focus();
+  });
+
+  // ── PWA : icône + manifest ────────────────────────────────────────────────
+  (function setupPWA() {
+    // Génère une icône 192x192 avec canvas
+    const canvas = document.createElement('canvas');
+    canvas.width = 192; canvas.height = 192;
+    const ctx = canvas.getContext('2d');
+
+    // Fond vert arrondi
+    ctx.fillStyle = '#2e7d32';
+    const r = 38;
+    ctx.beginPath();
+    ctx.moveTo(r, 0); ctx.lineTo(192 - r, 0);
+    ctx.quadraticCurveTo(192, 0, 192, r);
+    ctx.lineTo(192, 192 - r);
+    ctx.quadraticCurveTo(192, 192, 192 - r, 192);
+    ctx.lineTo(r, 192);
+    ctx.quadraticCurveTo(0, 192, 0, 192 - r);
+    ctx.lineTo(0, r);
+    ctx.quadraticCurveTo(0, 0, r, 0);
+    ctx.closePath();
+    ctx.fill();
+
+    // Chariot simplifié
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 10;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // Poignée
+    ctx.beginPath();
+    ctx.moveTo(32, 56);
+    ctx.lineTo(52, 56);
+    ctx.lineTo(68, 128);
+    ctx.lineTo(152, 128);
+    ctx.lineTo(164, 80);
+    ctx.lineTo(62, 80);
+    ctx.stroke();
+
+    // Roues
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(88, 150, 11, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(140, 150, 11, 0, Math.PI * 2); ctx.fill();
+
+    const iconDataUrl = canvas.toDataURL('image/png');
+
+    // Apple touch icon
+    document.getElementById('appleIcon').href = iconDataUrl;
+
+    // Web App Manifest inline
+    const manifest = {
+      name: 'Mes Courses — Ne rien oublier',
+      short_name: 'Mes Courses',
+      description: 'Liste de courses avec photos et total caddy',
+      start_url: '.',
+      display: 'standalone',
+      background_color: '#2e7d32',
+      theme_color: '#2e7d32',
+      orientation: 'portrait',
+      icons: [
+        { src: iconDataUrl, sizes: '192x192', type: 'image/png' },
+        { src: iconDataUrl, sizes: '512x512', type: 'image/png' }
+      ]
+    };
+    const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+    document.getElementById('manifestLink').href = URL.createObjectURL(blob);
+  })();
+
+  // ── INIT ──────────────────────────────────────────────────────────────────
+  render();
+</script>
+</body>
+</html>
